@@ -1,0 +1,92 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  namespace: kube-system
+  labels:
+    k8s-app: filebeat
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: filebeat
+    spec:
+      serviceAccountName: filebeat
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: filebeat
+        image: thecase/k8s-logzio-filebeat:latest
+        env:
+        - name: LOGSTASH_HOST
+          value: listener.logz.io:5015
+        - name: LOGZIO_TOKEN
+          valueFrom: 
+            secretKeyRef:
+              name: logzio-secrets
+              key: token
+        - name: CERT
+          value: '/var/secrets/COMODORSADomainValidationSecureServerCA.crt'
+        securityContext:
+          runAsUser: 0
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: docker
+          mountPath: /var/run/docker.sock
+          readOnly: true
+        - name: data
+          mountPath: /usr/share/filebeat/data
+        - name: logzio-secrets
+          mountPath: /var/secrets
+          readOnly: true
+      volumes:
+      - name: docker
+        hostPath:
+          path: /var/run/docker.sock
+      - name: data
+        emptyDir: {}
+      - name: logzio-secrets
+        secret:
+          secretName: logzio
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: filebeat
+subjects:
+- kind: ServiceAccount
+  name: filebeat
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: filebeat
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: filebeat
+  labels:
+    k8s-app: filebeat
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources:
+  - namespaces
+  - pods
+  verbs:
+  - get
+  - watch
+  - list
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: filebeat
+  namespace: kube-system
+  labels:
+    k8s-app: filebeat
+---
