@@ -123,7 +123,8 @@ data:
           fields_under_root: true
           fields:
             logzio_codec: json
-            logzio_token: {{ $.Env.LOGZIO_TOKEN }}
+            token: {{ $.Env.LOGZIO_TOKEN }}
+            type: docker
             docker/id: {{ $value.ID }}
             docker/image: {{ if $value.Image.Registry }}{{ $value.Image.Registry }}/{{ end }}{{ $value.Image.Repository }}{{ if $value.Image.Tag }}:{{ $value.Image.Tag }}{{ else }}:latest{{ end }}
             docker/name: {{ $value.Name }}
@@ -132,6 +133,16 @@ data:
             docker/label/{{ $k }}: {{ $v }}
             {{ end }}
       {{ end }}
+
+    processors:
+     - rename:
+        fields:
+         - from: "log"
+           to: "message"
+        ignore_missing: false
+        fail_on_error: true 
+     - decode_json_fields:
+         fields: ["docker/label/annotation.io.kubernetes.container.ports"]
 
     output.logstash:
       hosts: [ "{{ .Env.LOGSTASH_HOST }}" ]
