@@ -15,7 +15,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: filebeat
-        image: thecase/k8s-logzio-filebeat:1.0.0
+        image: thecase/k8s-logzio-filebeat:latest
         env:
         - name: LOGSTASH_HOST
           value: listener.logz.io:5015
