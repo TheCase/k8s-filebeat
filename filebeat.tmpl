@@ -12,10 +12,8 @@ filebeat:
       json.message_key: log
       fields_under_root: true
       fields:
-        {{ if .Env.LOGZIO_TOKEN }}
         logzio_codec: json
         logzio_token: {{ $.Env.LOGZIO_TOKEN }}
-        {{ end }}
         docker/id: {{ $value.ID }}
         docker/image: {{ if $value.Image.Registry }}{{ $value.Image.Registry }}/{{ end }}{{ $value.Image.Repository }}{{ if $value.Image.Tag }}:{{ $value.Image.Tag }}{{ else }}:latest{{ end }}
         docker/name: {{ $value.Name }}
