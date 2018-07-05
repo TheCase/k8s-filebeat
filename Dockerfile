@@ -13,5 +13,7 @@ RUN wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBE
 ADD supervisord.conf /etc/supervisord.conf
 ADD filebeat.tmpl /etc/docker-gen/filebeat.tmpl
 
+RUN mkdir /etc/beats
+
 CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
 

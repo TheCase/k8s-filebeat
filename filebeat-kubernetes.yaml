@@ -22,7 +22,7 @@ spec:
         - name: LOGZIO_TOKEN
           valueFrom: 
             secretKeyRef:
-              name: logzio-secrets
+              name: logzio
               key: token
         - name: CERT
           value: '/var/secrets/COMODORSADomainValidationSecureServerCA.crt'
